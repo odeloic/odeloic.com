@@ -1,17 +1,33 @@
 ---
-
+import BaseLayout from "../layouts/BaseLayout.astro";
 ---
+<BaseLayout title="Home" description="Fullstack software engineer. Building apps with React Native and Expo.">
+	<div class="intro">
+		<h1>Loïc Ishimwe (odeloic)</h1>
+		<p class="tagline">
+			Fullstack Software Engineer. <br>
+			Building apps with React Native and Expo.
+			<span class="accent">Learning and building in public.</span>
+		</p>
+	</div>
+</BaseLayout>
 
-<html lang="en">
-	<head>
-		<meta charset="utf-8" />
-		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-		<link rel="icon" href="/favicon.ico" />
-		<meta name="viewport" content="width=device-width" />
-		<meta name="generator" content={Astro.generator} />
-		<title>Astro</title>
-	</head>
-	<body>
-		<h1>Astro</h1>
-	</body>
-</html>
+<style>
+	.intro	{
+		margin-bottom: 5rem;
+	}
+
+	h1 {
+		margin-bottom: var(--space-md);
+	}
+
+	.tagline {
+		font-size: var(--font-size-xl);
+		color: var(--color-text-muted);
+		line-height: 1.5;
+	}
+
+	.accent {
+		color: var(--color-accent);
+	}
+</style>

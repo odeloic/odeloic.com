@@ -1,0 +1,52 @@
+---
+import BaseHeader from '../components/BaseHeader.astro';
+import Footer from '../components/Footer.astro';
+import Header from '../components/Header.astro';
+import '../styles/global.css';
+
+interface Props {
+  title: string;
+  description: string;
+}
+
+const { title, description } = Astro.props;
+---
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <BaseHeader title={title} description={description} />
+  </head>
+  <body>
+    <a href="#main-content" class="skip-link">Skip to main content</a>
+    <Header />
+    <main id="main-content" class="main">
+      <slot />
+    </main>
+    <Footer />
+  </body>
+</html>
+
+<style>
+  .skip-link {
+    position: absolute;
+    top: -40px;
+    left: 0;
+    background: var(--color-accent);
+    color: var(--color-bg);
+    padding: var(--space-sm) var(--space-md);
+    z-index: 100;
+    transition: top var(--transition-fast);
+
+    &:focus {
+      top: 0;
+    }
+  }
+
+  .main {
+    max-width: var(--max-width-content);
+    margin: 0 auto;
+    padding: var(--space-sm) var(--space-lg);
+    min-height: calc(100vh - 200px); /** == TODO: Rough estimates */;
+  }
+</style>
