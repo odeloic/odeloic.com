@@ -31,6 +31,7 @@ const projects = defineCollection({
       .optional(),
     stack: z.array(z.string()).default([]),
     featured: z.boolean().default(false),
+    draft: z.boolean().default(false),
   }),
 });
 
@@ -41,7 +42,7 @@ const learning = defineCollection({
     description: z.string(),
     startedAt: z.coerce.date(),
     updatedAt: z.coerce.date().optional(),
-    status: z.enum(["in_progress", "completed", "paused"]),
+    status: z.enum(["in-progress", "completed", "paused"]),
     tags: z.array(z.string()).default([]),
   }),
 });
