@@ -1,0 +1,109 @@
+---
+interface Props {
+  title: string;
+  description: string;
+  status: string;
+  version: string;
+  stack: string[];
+  slug: string;
+  links?: {
+    github?: string;
+    live?: string;
+    demo?: string;
+  };
+}
+
+const { title, description, status, version, stack, slug, links } = Astro.props;
+---
+
+<article class="project-card">
+  <div class="card-header">
+    <h3><a href={`/projects/${slug}`}>{title}</a></h3>
+    <span class={`status-badge status-badge--${status}`}>{status}</span>
+  </div>
+  <p class="card-description">{description}</p>
+  <div class="card-meta">
+    <span class="version">v{version}</span>
+    {stack.length > 0 && (
+      <div class="tags">
+        {stack.map((tech) => (
+          <span class="tag">{tech}</span>
+        ))}
+      </div>
+    )}
+  </div>
+  {links && (
+    <div class="card-links">
+      {links.github && (
+        <a href={links.github} target="_blank" rel="noopener noreferrer">GitHub</a>
+      )}
+      {links.live && (
+        <a href={links.live} target="_blank" rel="noopener noreferrer">Live</a>
+      )}
+      {links.demo && (
+        <a href={links.demo} target="_blank" rel="noopener noreferrer">Demo</a>
+      )}
+    </div>
+  )}
+</article>
+
+<style>
+  .project-card {
+    padding: var(--space-lg);
+    background: var(--color-bg-secondary);
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--color-border);
+    transition: border-color var(--transition-fast);
+  }
+
+  .project-card:hover {
+    border-color: var(--color-accent);
+  }
+
+  .card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: var(--space-md);
+    margin-bottom: var(--space-sm);
+  }
+
+  .card-header h3 a {
+    color: var(--color-text);
+    text-decoration: none;
+  }
+
+  .card-header h3 a:hover {
+    color: var(--color-accent);
+  }
+
+  .card-description {
+    color: var(--color-text-muted);
+    margin-bottom: var(--space-md);
+  }
+
+  .card-meta {
+    display: flex;
+    align-items: center;
+    gap: var(--space-md);
+    margin-bottom: var(--space-sm);
+  }
+
+  .version {
+    font-family: var(--font-mono);
+    font-size: var(--font-size-sm);
+    color: var(--color-text-muted);
+  }
+
+  .tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-xs);
+  }
+
+  .card-links {
+    display: flex;
+    gap: var(--space-md);
+    margin-top: var(--space-md);
+  }
+</style>

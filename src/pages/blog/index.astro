@@ -1,0 +1,112 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import PostCard from '../../components/PostCard.astro';
+
+const allPosts = await getCollection('blog', ({ data }) => !data.draft);
+const posts = allPosts.sort(
+  (a, b) => b.data.publishedAt.valueOf() - a.data.publishedAt.valueOf()
+);
+
+const allTags = [...new Set(posts.flatMap((post) => post.data.tags))].sort();
+
+const currentTag = Astro.url.searchParams.get('tag');
+const filteredPosts = currentTag
+  ? posts.filter((post) => post.data.tags.includes(currentTag))
+  : posts;
+---
+
+<BaseLayout title="Blog" description="Thoughts on software engineering, learning in public, and building products.">
+  <div class="blog-index">
+    <header class="page-header">
+      <h1>Blog</h1>
+      <p class="text-muted">Thoughts on software engineering, learning in public, and building products.</p>
+    </header>
+
+    {allTags.length > 0 && (
+      <nav class="tag-filters" aria-label="Filter by tag">
+        <a
+          href="/blog"
+          class:list={['tag-filter', { active: !currentTag }]}
+        >
+          All
+        </a>
+        {allTags.map((tag) => (
+          <a
+            href={`/blog?tag=${tag}`}
+            class:list={['tag-filter', { active: currentTag === tag }]}
+          >
+            {tag}
+          </a>
+        ))}
+      </nav>
+    )}
+
+    {filteredPosts.length > 0 ? (
+      <div class="post-list">
+        {filteredPosts.map((post) => (
+          <PostCard
+            title={post.data.title}
+            description={post.data.description}
+            publishedAt={post.data.publishedAt}
+            tags={post.data.tags}
+            slug={post.slug}
+          />
+        ))}
+      </div>
+    ) : (
+      <p class="empty-state text-muted">No posts yet. Check back soon!</p>
+    )}
+  </div>
+</BaseLayout>
+
+<style>
+  .page-header {
+    margin-bottom: var(--space-xl);
+  }
+
+  .page-header h1 {
+    margin-bottom: var(--space-sm);
+  }
+
+  .tag-filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-xs);
+    margin-bottom: var(--space-xl);
+  }
+
+  .tag-filter {
+    font-size: var(--font-size-sm);
+    padding: var(--space-xs) var(--space-sm);
+    border-radius: var(--radius-sm);
+    background: var(--color-bg-secondary);
+    color: var(--color-text-muted);
+    border: 1px solid var(--color-border);
+    text-decoration: none;
+    transition: all var(--transition-fast);
+  }
+
+  .tag-filter:hover {
+    border-color: var(--color-accent);
+    color: var(--color-text);
+    text-decoration: none;
+  }
+
+  .tag-filter.active {
+    background: var(--color-accent);
+    color: var(--color-bg);
+    border-color: var(--color-accent);
+  }
+
+  .post-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-lg);
+  }
+
+  .empty-state {
+    padding: var(--space-2xl) 0;
+    text-align: center;
+  }
+</style>

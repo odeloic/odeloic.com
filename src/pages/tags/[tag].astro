@@ -1,0 +1,183 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { formatDate } from '../../utils/formatDate';
+
+export async function getStaticPaths() {
+  const allPosts = await getCollection('blog', ({ data }) => !data.draft);
+  const allProjects = await getCollection('projects', ({ data }) => !data.draft);
+  const allLearning = await getCollection('learning');
+
+  const tags = new Set<string>();
+  allPosts.forEach((p) => p.data.tags.forEach((t) => tags.add(t)));
+  allProjects.forEach((p) => p.data.tags.forEach((t) => tags.add(t)));
+  allLearning.forEach((l) => l.data.tags.forEach((t) => tags.add(t)));
+
+  return [...tags].map((tag) => ({
+    params: { tag },
+    props: {
+      tag,
+      posts: allPosts.filter((p) => p.data.tags.includes(tag))
+        .sort((a, b) => b.data.publishedAt.valueOf() - a.data.publishedAt.valueOf()),
+      projects: allProjects.filter((p) => p.data.tags.includes(tag))
+        .sort((a, b) => b.data.startedAt.valueOf() - a.data.startedAt.valueOf()),
+      learning: allLearning.filter((l) => l.data.tags.includes(tag))
+        .sort((a, b) => (b.data.updatedAt ?? b.data.startedAt).valueOf() - (a.data.updatedAt ?? a.data.startedAt).valueOf()),
+    },
+  }));
+}
+
+const { tag, posts, projects, learning } = Astro.props;
+
+const statusMap: Record<string, string> = {
+  'in-progress': 'idea',
+  'completed': 'active',
+  'paused': 'maintained',
+};
+---
+
+<BaseLayout title={`Tag: ${tag}`} description={`All content tagged with "${tag}".`}>
+  <div class="tag-page">
+    <header class="page-header">
+      <a href="/tags" class="back-link">&larr; All tags</a>
+      <h1>#{tag}</h1>
+      <p class="text-muted">
+        {posts.length + projects.length + learning.length} item{posts.length + projects.length + learning.length !== 1 ? 's' : ''}
+      </p>
+    </header>
+
+    {posts.length > 0 && (
+      <section class="content-section">
+        <h2 class="section-label">Blog Posts</h2>
+        <div class="item-list">
+          {posts.map((post) => (
+            <article class="list-item">
+              <div class="item-header">
+                <h3><a href={`/blog/${post.slug}`}>{post.data.title}</a></h3>
+                <time class="text-muted" datetime={post.data.publishedAt.toISOString()}>
+                  {formatDate(post.data.publishedAt)}
+                </time>
+              </div>
+              <p class="item-description">{post.data.description}</p>
+            </article>
+          ))}
+        </div>
+      </section>
+    )}
+
+    {projects.length > 0 && (
+      <section class="content-section">
+        <h2 class="section-label">Projects</h2>
+        <div class="item-list">
+          {projects.map((project) => (
+            <article class="list-item">
+              <div class="item-header">
+                <h3><a href={`/projects/${project.slug}`}>{project.data.title}</a></h3>
+                <span class={`status-badge status-badge--${project.data.status}`}>
+                  {project.data.status}
+                </span>
+              </div>
+              <p class="item-description">{project.data.description}</p>
+            </article>
+          ))}
+        </div>
+      </section>
+    )}
+
+    {learning.length > 0 && (
+      <section class="content-section">
+        <h2 class="section-label">Learning Logs</h2>
+        <div class="item-list">
+          {learning.map((log) => (
+            <article class="list-item">
+              <div class="item-header">
+                <h3><a href={`/learning/${log.slug}`}>{log.data.title}</a></h3>
+                <span class={`status-badge status-badge--${statusMap[log.data.status]}`}>
+                  {log.data.status}
+                </span>
+              </div>
+              <p class="item-description">{log.data.description}</p>
+            </article>
+          ))}
+        </div>
+      </section>
+    )}
+  </div>
+</BaseLayout>
+
+<style>
+  .page-header {
+    margin-bottom: var(--space-xl);
+  }
+
+  .back-link {
+    display: inline-block;
+    font-size: var(--font-size-sm);
+    color: var(--color-text-muted);
+    margin-bottom: var(--space-lg);
+  }
+
+  .back-link:hover {
+    color: var(--color-accent);
+  }
+
+  .page-header h1 {
+    margin-bottom: var(--space-xs);
+    color: var(--color-accent);
+  }
+
+  .content-section {
+    margin-bottom: var(--space-2xl);
+  }
+
+  .content-section .section-label {
+    margin-bottom: var(--space-md);
+  }
+
+  .item-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-md);
+  }
+
+  .list-item {
+    padding: var(--space-md) var(--space-lg);
+    background: var(--color-bg-secondary);
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--color-border);
+    transition: border-color var(--transition-fast);
+  }
+
+  .list-item:hover {
+    border-color: var(--color-accent);
+  }
+
+  .item-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: var(--space-md);
+    margin-bottom: var(--space-xs);
+  }
+
+  .item-header h3 a {
+    color: var(--color-text);
+    text-decoration: none;
+  }
+
+  .item-header h3 a:hover {
+    color: var(--color-accent);
+  }
+
+  .item-description {
+    color: var(--color-text-muted);
+    margin: 0;
+  }
+
+  @media (max-width: 640px) {
+    .item-header {
+      flex-direction: column;
+      gap: var(--space-xs);
+    }
+  }
+</style>
