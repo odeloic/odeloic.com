@@ -1,0 +1,123 @@
+---
+interface ChangelogEntry {
+  version: string;
+  date: string;
+  changes: string[];
+  lessons?: string[];
+}
+
+interface Props {
+  entries: ChangelogEntry[];
+}
+
+const { entries } = Astro.props;
+---
+
+{entries.length > 0 && (
+  <section class="changelog">
+    <h2>Changelog</h2>
+    <div class="timeline">
+      {entries.map((entry) => (
+        <div class="timeline-entry">
+          <div class="timeline-marker"></div>
+          <div class="timeline-content">
+            <div class="timeline-header">
+              <span class="version">{entry.version}</span>
+              <time class="text-muted">{entry.date}</time>
+            </div>
+            <ul class="changes">
+              {entry.changes.map((change) => (
+                <li>{change}</li>
+              ))}
+            </ul>
+            {entry.lessons && entry.lessons.length > 0 && (
+              <div class="lessons">
+                <strong>Lessons learned:</strong>
+                <ul>
+                  {entry.lessons.map((lesson) => (
+                    <li>{lesson}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
+          </div>
+        </div>
+      ))}
+    </div>
+  </section>
+)}
+
+<style>
+  .changelog h2 {
+    margin-bottom: var(--space-lg);
+  }
+
+  .timeline {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-lg);
+    padding-left: var(--space-lg);
+    border-left: 2px solid var(--color-border);
+  }
+
+  .timeline-entry {
+    position: relative;
+  }
+
+  .timeline-marker {
+    position: absolute;
+    left: calc(-1 * var(--space-lg) - 5px);
+    top: 6px;
+    width: 8px;
+    height: 8px;
+    border-radius: var(--radius-full);
+    background: var(--color-accent);
+  }
+
+  .timeline-header {
+    display: flex;
+    align-items: baseline;
+    gap: var(--space-md);
+    margin-bottom: var(--space-sm);
+  }
+
+  .version {
+    font-family: var(--font-mono);
+    font-size: var(--font-size-sm);
+    font-weight: 600;
+    color: var(--color-accent);
+  }
+
+  .changes {
+    padding-left: var(--space-lg);
+    margin-bottom: var(--space-sm);
+  }
+
+  .changes li {
+    margin-bottom: var(--space-xs);
+    color: var(--color-text-muted);
+  }
+
+  .lessons {
+    margin-top: var(--space-sm);
+    padding: var(--space-sm) var(--space-md);
+    background: var(--color-accent-muted);
+    border-radius: var(--radius-sm);
+    font-size: var(--font-size-sm);
+  }
+
+  .lessons strong {
+    display: block;
+    margin-bottom: var(--space-xs);
+    color: var(--color-text);
+  }
+
+  .lessons ul {
+    padding-left: var(--space-lg);
+  }
+
+  .lessons li {
+    margin-bottom: var(--space-xs);
+    color: var(--color-text-muted);
+  }
+</style>

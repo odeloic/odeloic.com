@@ -1,17 +1,20 @@
 ---
 import { getCollection } from "astro:content";
 import BaseLayout from "../layouts/BaseLayout.astro";
-import { formatDate } from "../utils/formatDate";
+import PostCard from "../components/PostCard.astro";
+import ProjectCard from "../components/ProjectCard.astro";
 
 const allProjects = await getCollection('projects');
-const featureProjects = allProjects
+const featuredProjects = allProjects
 	.filter(project => project.data.featured && !project.data.draft)
-	.slice(0,2);
+	.slice(0, 2);
 
 const allPosts = await getCollection('blog', ({ data: blog }) => !blog.draft);
-const recentPosts = allPosts.sort((a, b) => b.data.publishedAt.valueOf() - a.data.publishedAt.valueOf()).slice(0,3);
-
+const recentPosts = allPosts
+	.sort((a, b) => b.data.publishedAt.valueOf() - a.data.publishedAt.valueOf())
+	.slice(0, 3);
 ---
+
 <BaseLayout title="Home" description="Fullstack software engineer. Building apps with React Native and Expo.">
 	<div class="home">
 		<section class="hero">
@@ -23,70 +26,45 @@ const recentPosts = allPosts.sort((a, b) => b.data.publishedAt.valueOf() - a.dat
 			</p>
 		</section>
 
-		{featureProjects.length > 0 && (
+		{featuredProjects.length > 0 && (
 			<section class="section">
-				<h2 class="section-label">Featured Projects</h2>
+				<div class="section-header">
+					<h2 class="section-label">Featured Projects</h2>
+					<a href="/projects" class="section-link">View all &rarr;</a>
+				</div>
 				<div class="card-grid">
-					{featureProjects.map((project) => (
-						<article class="card">
-							<div class="card-header">
-								<h3>{project.data.title}</h3>
-								<span class={`status-badge status-badge--${project.data.status}`}>
-									{project.data.status}
-								</span>
-							</div>
-							<p class="card-description">{project.data.description}</p>
-							{project.data.stack.length > 0 && (
-								<div class="tags">
-									{project.data.stack.map((tech) => (
-										<span class="tag">{tech}</span>
-									))}
-								</div>
-							)}
-							{project.data.links && (
-								<div class="card-links">
-									{project.data.links.github && (
-										<a href={project.data.links.github}>GitHub</a>
-									)}
-									{project.data.links.live && (
-										<a href={project.data.links.live}>Live</a>
-									)}
-									{project.data.links.demo && (
-										<a href={project.data.links.demo}>Demo</a>
-									)}
-								</div>
-							)}
-						</article>
+					{featuredProjects.map((project) => (
+						<ProjectCard
+							title={project.data.title}
+							description={project.data.description}
+							status={project.data.status}
+							version={project.data.version}
+							stack={project.data.stack}
+							slug={project.slug}
+							links={project.data.links}
+						/>
 					))}
 				</div>
-				<a href="/projects" class="btn btn--secondary">View all projects</a>
 			</section>
 		)}
 
 		{recentPosts.length > 0 && (
 			<section class="section">
-				<h2 class="section-label">Recent Posts</h2>
+				<div class="section-header">
+					<h2 class="section-label">Recent Posts</h2>
+					<a href="/blog" class="section-link">View all &rarr;</a>
+				</div>
 				<div class="card-list">
 					{recentPosts.map((post) => (
-						<article class="card">
-							<div class="card-header">
-								<h3><a href={`/blog/${post.slug}`}>{post.data.title}</a></h3>
-								<time class="text-muted" datetime={post.data.publishedAt.toISOString()}>
-									{formatDate(post.data.publishedAt)}
-								</time>
-							</div>
-							<p class="card-description">{post.data.description}</p>
-							{post.data.tags.length > 0 && (
-								<div class="tags">
-									{post.data.tags.map((tag) => (
-										<span class="tag">{tag}</span>
-									))}
-								</div>
-							)}
-						</article>
+						<PostCard
+							title={post.data.title}
+							description={post.data.description}
+							publishedAt={post.data.publishedAt}
+							tags={post.data.tags}
+							slug={post.slug}
+						/>
 					))}
 				</div>
-				<a href="/blog" class="btn btn--secondary">View all posts</a>
 			</section>
 		)}
 	</div>
@@ -111,46 +89,31 @@ const recentPosts = allPosts.sort((a, b) => b.data.publishedAt.valueOf() - a.dat
 		margin-top: var(--space-3xl);
 	}
 
-	.section-label {
+	.section-header {
+		display: flex;
+		justify-content: space-between;
+		align-items: baseline;
 		margin-bottom: var(--space-lg);
+	}
+
+	.section-link {
+		font-size: var(--font-size-sm);
+		color: var(--color-text-muted);
+	}
+
+	.section-link:hover {
+		color: var(--color-accent);
 	}
 
 	.card-grid {
 		display: grid;
 		grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
 		gap: var(--space-lg);
-		margin-bottom: var(--space-xl);
 	}
 
 	.card-list {
 		display: flex;
 		flex-direction: column;
 		gap: var(--space-lg);
-		margin-bottom: var(--space-xl);
-	}
-
-	.card-header {
-		display: flex;
-		justify-content: space-between;
-		align-items: baseline;
-		gap: var(--space-md);
-		margin-bottom: var(--space-sm);
-	}
-
-	.card-description {
-		color: var(--color-text-muted);
-		margin-bottom: var(--space-md);
-	}
-
-	.tags {
-		display: flex;
-		flex-wrap: wrap;
-		gap: var(--space-xs);
-	}
-
-	.card-links {
-		display: flex;
-		gap: var(--space-md);
-		margin-top: var(--space-md);
 	}
 </style>
