@@ -25,12 +25,7 @@ const statusMap: Record<string, string> = {
   <article class="learning-detail">
     <header class="learning-header">
       <a href="/learning" class="back-link">&larr; Back to learning</a>
-      <div class="title-row">
-        <h1>{log.data.title}</h1>
-        <span class={`status-badge status-badge--${statusMap[log.data.status]}`}>
-          {log.data.status}
-        </span>
-      </div>
+      <h1>{log.data.title}</h1>
       <p class="learning-description">{log.data.description}</p>
       <div class="learning-meta">
         <time datetime={log.data.startedAt.toISOString()}>
@@ -42,6 +37,9 @@ const statusMap: Record<string, string> = {
           </time>
         )}
       </div>
+      <span class={`status-badge status-badge--${statusMap[log.data.status]}`}>
+        {log.data.status}
+      </span>
       {log.data.tags.length > 0 && (
         <div class="learning-tags">
           {log.data.tags.map((tag) => (
@@ -58,7 +56,7 @@ const statusMap: Record<string, string> = {
 
 <style>
   .learning-detail {
-    max-width: 600px;
+    max-width: 100%;
   }
 
   .back-link {
@@ -76,10 +74,7 @@ const statusMap: Record<string, string> = {
     margin-bottom: var(--space-2xl);
   }
 
-  .title-row {
-    display: flex;
-    align-items: baseline;
-    gap: var(--space-md);
+  .learning-header h1 {
     margin-bottom: var(--space-sm);
   }
 
@@ -93,7 +88,7 @@ const statusMap: Record<string, string> = {
     gap: var(--space-lg);
     font-size: var(--font-size-sm);
     color: var(--color-text-muted);
-    margin-bottom: var(--space-md);
+    margin-bottom: var(--space-sm);
   }
 
   .learning-tags {
@@ -105,7 +100,7 @@ const statusMap: Record<string, string> = {
   .learning-content {
     font-size: var(--font-size-base);
     line-height: var(--line-height-relaxed);
-    color: var(--color-text-muted);
+    color: var(--color-text);
   }
 
   .learning-content :global(p) {
@@ -161,11 +156,6 @@ const statusMap: Record<string, string> = {
   }
 
   @media (max-width: 640px) {
-    .title-row {
-      flex-direction: column;
-      gap: var(--space-sm);
-    }
-
     .learning-meta {
       flex-direction: column;
       gap: var(--space-xs);

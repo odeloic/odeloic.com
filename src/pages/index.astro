@@ -3,6 +3,7 @@ import { getCollection } from "astro:content";
 import BaseLayout from "../layouts/BaseLayout.astro";
 import PostCard from "../components/PostCard.astro";
 import ProjectCard from "../components/ProjectCard.astro";
+import { formatDate } from "../utils/formatDate";
 
 const allProjects = await getCollection('projects');
 const featuredProjects = allProjects
@@ -13,6 +14,21 @@ const allPosts = await getCollection('blog', ({ data: blog }) => !blog.draft);
 const recentPosts = allPosts
 	.sort((a, b) => b.data.publishedAt.valueOf() - a.data.publishedAt.valueOf())
 	.slice(0, 3);
+
+const allLearning = await getCollection('learning');
+const recentLearning = allLearning
+	.sort((a, b) => {
+		const dateA = a.data.updatedAt ?? a.data.startedAt;
+		const dateB = b.data.updatedAt ?? b.data.startedAt;
+		return dateB.valueOf() - dateA.valueOf();
+	})
+	.slice(0, 3);
+
+const statusMap: Record<string, string> = {
+	'in-progress': 'idea',
+	'completed': 'active',
+	'paused': 'maintained',
+};
 ---
 
 <BaseLayout title="Home" description="Fullstack software engineer. Building apps with React Native and Expo.">
@@ -67,6 +83,40 @@ const recentPosts = allPosts
 				</div>
 			</section>
 		)}
+
+		{recentLearning.length > 0 && (
+			<section class="section">
+				<div class="section-header">
+					<h2 class="section-label">Learning</h2>
+					<a href="/learning" class="section-link">View all &rarr;</a>
+				</div>
+				<div class="card-list">
+					{recentLearning.map((log) => (
+						<article class="log-item">
+							<div class="log-header">
+								<h3><a href={`/learning/${log.slug}`}>{log.data.title}</a></h3>
+								<span class={`status-badge status-badge--${statusMap[log.data.status]}`}>
+									{log.data.status}
+								</span>
+							</div>
+							<p class="log-description">{log.data.description}</p>
+							<div class="log-meta">
+								<time class="text-muted" datetime={(log.data.updatedAt ?? log.data.startedAt).toISOString()}>
+									{formatDate(log.data.updatedAt ?? log.data.startedAt)}
+								</time>
+								{log.data.tags.length > 0 && (
+									<div class="tags">
+										{log.data.tags.map((tag) => (
+											<a href={`/tags/${tag}`} class="tag">{tag}</a>
+										))}
+									</div>
+								)}
+							</div>
+						</article>
+					))}
+				</div>
+			</section>
+		)}
 	</div>
 </BaseLayout>
 
@@ -115,5 +165,53 @@ const recentPosts = allPosts
 		display: flex;
 		flex-direction: column;
 		gap: var(--space-lg);
+	}
+
+	.log-item {
+		padding: var(--space-lg);
+		background: var(--color-bg-secondary);
+		border-radius: var(--radius-lg);
+		border: 1px solid var(--color-border);
+		transition: border-color var(--transition-fast);
+	}
+
+	.log-item:hover {
+		border-color: var(--color-accent);
+	}
+
+	.log-header {
+		display: flex;
+		justify-content: space-between;
+		align-items: baseline;
+		gap: var(--space-md);
+		margin-bottom: var(--space-sm);
+	}
+
+	.log-header h3 a {
+		color: var(--color-text);
+		text-decoration: none;
+	}
+
+	.log-header h3 a:hover {
+		color: var(--color-accent);
+	}
+
+	.log-description {
+		color: var(--color-text-muted);
+		margin-bottom: var(--space-md);
+	}
+
+	.log-meta {
+		display: flex;
+		align-items: center;
+		gap: var(--space-md);
+		flex-wrap: wrap;
+	}
+
+	@media (max-width: 640px) {
+		.log-header {
+			flex-direction: column;
+			gap: var(--space-xs);
+		}
 	}
 </style>
